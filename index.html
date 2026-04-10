@@ -1,0 +1,1935 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Q Skills Audio Platform - Interactive Presentation</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            padding: 20px;
+            color: #333;
+        }
+
+        .presentation-container {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            width: 100%;
+            max-width: 900px;
+            min-height: 600px;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .slide-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px 40px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 3px solid #764ba2;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+
+        .slide-title {
+            font-size: 28px;
+            font-weight: bold;
+            margin: 0;
+            flex: 1;
+            min-width: 200px;
+        }
+
+        .slide-counter {
+            background: rgba(255, 255, 255, 0.2);
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 14px;
+            font-weight: 600;
+        }
+
+        .search-box-container {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            background: rgba(255, 255, 255, 0.1);
+            padding: 8px 12px;
+            border-radius: 20px;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            position: relative;
+        }
+
+        .search-box-container label {
+            font-size: 12px;
+            font-weight: 600;
+            white-space: nowrap;
+            color: rgba(255, 255, 255, 0.9);
+        }
+
+        #slideSearch {
+            background: rgba(255, 255, 255, 0.9);
+            border: none;
+            padding: 6px 10px;
+            border-radius: 4px;
+            width: 150px;
+            font-size: 13px;
+            color: #333;
+        }
+
+        #slideSearch::placeholder {
+            color: #999;
+        }
+
+        #slideSearch:focus {
+            outline: 2px solid #ffc107;
+            outline-offset: 2px;
+        }
+
+        .search-suggestions {
+            position: absolute;
+            background: white;
+            border: 2px solid #667eea;
+            border-radius: 8px;
+            max-height: 300px;
+            overflow-y: auto;
+            z-index: 1000;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            display: none;
+            min-width: 250px;
+            top: 45px;
+            left: 0;
+        }
+
+        .search-suggestions.active {
+            display: block;
+        }
+
+        .suggestion-item {
+            padding: 10px 15px;
+            cursor: pointer;
+            border-bottom: 1px solid #eee;
+            transition: background 0.2s;
+        }
+
+        .suggestion-item:last-child {
+            border-bottom: none;
+        }
+
+        .suggestion-item:hover {
+            background: #f0f8ff;
+            color: #667eea;
+            font-weight: 600;
+        }
+
+        .suggestion-item.selected {
+            background: #667eea;
+            color: white;
+            font-weight: 600;
+        }
+
+        .suggestion-number {
+            font-weight: 700;
+            color: #667eea;
+            margin-right: 8px;
+        }
+
+        .suggestion-item.selected .suggestion-number {
+            color: #ffc107;
+        }
+
+        .slide-content {
+            flex: 1;
+            padding: 60px 40px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            overflow-y: auto;
+        }
+
+        .audience-question {
+            background: #fff3cd;
+            border-left: 5px solid #ffc107;
+            padding: 25px;
+            border-radius: 8px;
+            margin-bottom: 30px;
+            font-size: 18px;
+            font-weight: 600;
+            color: #856404;
+            line-height: 1.6;
+            min-height: 80px;
+            display: flex;
+            align-items: center;
+        }
+
+        .content-section {
+            background: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+
+        details {
+            padding: 20px;
+        }
+
+        details > summary {
+            cursor: pointer;
+            font-weight: 600;
+            color: #667eea;
+            padding: 10px;
+            user-select: none;
+            display: flex;
+            align-items: center;
+            font-size: 16px;
+            transition: color 0.2s;
+        }
+
+        details > summary:hover {
+            color: #764ba2;
+            text-decoration: underline;
+        }
+
+        details > summary::before {
+            content: "▶ ";
+            display: inline-block;
+            margin-right: 8px;
+            transition: transform 0.2s;
+        }
+
+        details[open] > summary::before {
+            transform: rotate(90deg);
+        }
+
+        details > summary::-webkit-details-marker {
+            display: none;
+        }
+
+        .detail-content {
+            padding: 15px 10px;
+            color: #555;
+            line-height: 1.7;
+        }
+
+        .detail-content h3 {
+            color: #667eea;
+            margin-top: 15px;
+            margin-bottom: 8px;
+            font-size: 16px;
+        }
+
+        .detail-content h3:first-child {
+            margin-top: 0;
+        }
+
+        .detail-content ul, .detail-content ol {
+            margin-left: 20px;
+            margin-bottom: 10px;
+        }
+
+        .detail-content li {
+            margin-bottom: 6px;
+        }
+
+        .detail-content p {
+            margin-bottom: 12px;
+        }
+
+        .detail-content strong {
+            color: #333;
+        }
+
+        .detail-content table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 15px 0;
+            font-size: 14px;
+        }
+
+        .detail-content table th,
+        .detail-content table td {
+            border: 1px solid #ddd;
+            padding: 10px;
+            text-align: left;
+        }
+
+        .detail-content table th {
+            background: #e9ecef;
+            font-weight: 600;
+            color: #667eea;
+        }
+
+        .detail-content table tr:nth-child(even) {
+            background: #f8f9fa;
+        }
+
+        .slide-navigation {
+            display: flex;
+            gap: 15px;
+            align-items: center;
+            justify-content: center;
+            padding: 30px 40px;
+            background: #f8f9fa;
+            border-top: 1px solid #dee2e6;
+            flex-wrap: wrap;
+        }
+
+        button {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            border-radius: 25px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+            min-width: 120px;
+        }
+
+        button:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.6);
+        }
+
+        button:active:not(:disabled) {
+            transform: translateY(0);
+        }
+
+        button:disabled {
+            opacity: 0.4;
+            cursor: not-allowed;
+            box-shadow: none;
+        }
+
+        .slide-info {
+            font-size: 14px;
+            color: #666;
+            margin: 0 20px;
+            min-width: 60px;
+        }
+
+        .agenda-list {
+            list-style: none;
+            padding: 0;
+        }
+
+        .agenda-list li {
+            padding: 12px 20px;
+            margin-bottom: 8px;
+            background: white;
+            border-left: 4px solid #667eea;
+            font-size: 16px;
+            color: #333;
+        }
+
+        .agenda-list li:hover {
+            background: #f8f9fa;
+        }
+
+        @media (max-width: 768px) {
+            .slide-header {
+                padding: 15px 20px;
+                flex-direction: column;
+                gap: 10px;
+            }
+
+            .slide-title {
+                font-size: 22px;
+            }
+
+            .search-box-container {
+                width: 100%;
+            }
+
+            #slideSearch {
+                width: 100%;
+            }
+
+            .slide-content {
+                padding: 30px 20px;
+            }
+
+            .audience-question {
+                font-size: 16px;
+                padding: 18px;
+            }
+
+            button {
+                padding: 10px 20px;
+                font-size: 14px;
+                min-width: 100px;
+            }
+
+            .slide-navigation {
+                padding: 20px;
+                flex-wrap: wrap;
+            }
+        }
+
+        @media print {
+            body {
+                background: white;
+            }
+
+            .presentation-container {
+                box-shadow: none;
+                max-width: 100%;
+            }
+
+            .slide-navigation {
+                display: none;
+            }
+
+            .search-box-container {
+                display: none;
+            }
+        }
+
+        button:focus, details > summary:focus {
+            outline: 3px solid #ffc107;
+            outline-offset: 2px;
+        }
+
+        .fade-in {
+            animation: fadeIn 0.3s ease-in;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+            }
+            to {
+                opacity: 1;
+            }
+        }
+    </style>
+</head>
+<body role="document">
+
+    <div class="presentation-container" role="main">
+        
+        <header class="slide-header">
+            <h1 class="slide-title" id="slideTitle">Presentation Title</h1>
+            <div class="slide-counter" id="slideCounter">Slide 1 of 19</div>
+            
+            <div class="search-box-container">
+                <label for="slideSearch">Jump to:</label>
+                <input 
+                    type="text" 
+                    id="slideSearch" 
+                    placeholder="Slide # or title..." 
+                    aria-label="Search for slide by number or title"
+                    autocomplete="off"
+                />
+                <div class="search-suggestions" id="searchSuggestions" role="listbox"></div>
+            </div>
+        </header>
+
+        <section class="slide-content" id="slideContent">
+            <!-- Slides will be dynamically inserted here -->
+        </section>
+
+        <nav class="slide-navigation" role="navigation" aria-label="Slide navigation">
+            <button id="prevBtn" aria-label="Previous slide">← Previous</button>
+            <span class="slide-info" id="slideInfo">1 / 19</span>
+            <button id="nextBtn" aria-label="Next slide">Next →</button>
+        </nav>
+    </div>
+
+    <script>
+        // Presentation data
+        const slides = [
+            // Slide 1: Agenda
+            {
+                title: "Agenda",
+                question: " Topics we will cover today and what you can expect to learn.",
+                content: `
+                    <h3>Today's Topics</h3>
+                    <ul class="agenda-list">
+                        <li><strong>Section 1:</strong> Introduction & Institutional Context</li>
+                        <li><strong>Section 2:</strong> Theoretical Foundations (SLA Research)</li>
+                        <li><strong>Section 3:</strong> Three Core Use Cases</li>
+                        <li><strong>Section 4:</strong> Implementation Strategies</li>
+                        <li><strong>Section 5:</strong> Next Steps & Questions</li>
+                    </ul>
+                    <h3 style="margin-top: 25px;">Learning Outcomes</h3>
+                    <p>By the end of this presentation, you will understand:</p>
+                    <ul>
+                        <li>How the Q Skills Audio Platform addresses a documented pedagogical gap</li>
+                        <li>Research-based theoretical foundations supporting the platform design</li>
+                        <li>How to implement the platform across three distinct pedagogical contexts</li>
+                        <li>Specific accommodation strategies for weak learners and visually impaired students</li>
+                        <li>Practical, time-managed integration within KSU's 75-minute session structure</li>
+                    </ul>
+                `
+            },
+
+
+            // Slide 2: The Problem
+            {
+                title: "The Problem",
+                question: "What challenges do teachers face when using Oxford's classroom presentation tool?",
+                content: `
+                    <h3>Oxford Player Limitation</h3>
+                    <p>Oxford's classroom presentation tool can play full-length audio files that come with Q Skills for Success, BUT:</p>
+                    <ul>
+                        <li><strong>Full tracks are too long</strong> for weak/visually impaired learners (often 6-12 minutes)</li>
+                        <li><strong>Learners get lost</strong> in longer segments; cannot focus on specific language points</li>
+                        <li><strong>Hard to manage</strong> multiple listening exposures within time-constrained sessions</li>
+                        <li><strong>Cannot support</strong> segmented, chunked audio files created by teachers</li>
+                    </ul>
+
+                    <h3>Teacher Solution at KSU</h3>
+                    <p>Many teachers segment longer audio tracks into shorter chunks (30 seconds to 2 minutes) to:</p>
+                    <ul>
+                        <li>Manage cognitive load for weak learners</li>
+                        <li>Support accessibility for visually impaired students</li>
+                        <li>Enable multiple listening exposures within 75-minute sessions</li>
+                        <li>Focus on specific vocabulary or grammar points</li>
+                    </ul>
+
+                    <h3>The Gap</h3>
+                    <p><strong>Oxford's player will not play these custom-chunked audio files.</strong></p>
+                    <p>The Q Skills Audio Platform bridges this gap by providing a dedicated player for custom-chunked audio segments.</p>
+                `
+            },
+
+            // Slide 3: Institutional Context
+            {
+                title: "King Saud University Context",
+                question: "What are the key constraints and opportunities in our teaching environment?",
+                content: `
+                    <h3>First Common Year Structure</h3>
+                    <table>
+                        <tr>
+                            <th>Aspect</th>
+                            <th>Specification</th>
+                        </tr>
+                        <tr>
+                            <td>Duration</td>
+                            <td>8-week semester</td>
+                        </tr>
+                        <tr>
+                            <td>Frequency</td>
+                            <td>5 days per week</td>
+                        </tr>
+                        <tr>
+                            <td>Session Length</td>
+                            <td>75 minutes</td>
+                        </tr>
+                        <tr>
+                            <td>Total Hours</td>
+                            <td>~31.25 hours per semester</td>
+                        </tr>
+                        <tr>
+                            <td>Student Requirement</td>
+                            <td>Mandatory for all First Common Year students</td>
+                        </tr>
+                    </table>
+
+                    <h3>Proficiency Levels</h3>
+                    <p>Placement-based cohort grouping using diagnostic test:</p>
+                    <ul>
+                        <li><strong>Q Skills Intro:</strong> CEFR A1 (lower-performing students; includes visually impaired cohort)</li>
+                        <li><strong>Q Skills 1:</strong> CEFR A1/A2</li>
+                        <li><strong>Q Skills 2:</strong> CEFR A2</li>
+                        <li><strong>Q Skills 3:</strong> CEFR A2/B1</li>
+                        <li><strong>Q Skills 4:</strong> CEFR B1</li>
+                        <li><strong>Q Skills 5:</strong> CEFR B1/B2</li>
+                    </ul>
+
+                    <h3>Special Considerations</h3>
+                    <ul>
+                        <li>Visually impaired students in Q Skills Intro cohort (listening/speaking focus)</li>
+                        <li>Mixed-proficiency groups within each cohort (within-group differentiation needed)</li>
+                        <li>Time constraints (75 minutes limits content coverage and activity variety)</li>
+                        <li>Students' first language is Arabic (Arabic scaffolding valuable for weak learners)</li>
+                    </ul>
+                `
+            },
+
+            // Slide 4: Platform Overview
+            {
+                title: "Q Skills Audio Platform - Overview",
+                question: "What core functions should a teaching tool provide?",
+                content: `
+                    <h3>Platform Purpose</h3>
+                    <p>A web-based audio player designed to:</p>
+                    <ul>
+                        <li>Play custom-chunked audio segments organized by unit and lesson</li>
+                        <li>Support scaffolding through multiple representation modes</li>
+                        <li>Enable efficient navigation via search functionality</li>
+                        <li>Integrate formative assessment through quiz mode</li>
+                        <li>Maintain full accessibility for visually impaired learners</li>
+                    </ul>
+
+                    <h3>Three Core Functions</h3>
+                    <ol>
+                        <li><strong>Classroom Instruction:</strong> Delivers chunked audio with strategic scaffolding (Arabic TTS, English TTS, definitions, illustrations)</li>
+                        <li><strong>Independent Study:</strong> Enables self-paced review; supports visually impaired student independence; scaffolding available as needed</li>
+                        <li><strong>Test Preparation:</strong> Search/jump functionality allows quick navigation to specific vocabulary/grammar points; reduces revision time</li>
+                    </ol>
+
+                    <h3>Key Design Principles</h3>
+                    <ul>
+                        <li><strong>Audio-First Design:</strong> Audio is primary input; text/translation are supplementary supports</li>
+                        <li><strong>Universal Design:</strong> Accessibility features benefit all learners, not only those with disabilities</li>
+                        <li><strong>Scaffolding Flexibility:</strong> Teachers and students choose when and how much support to use</li>
+                        <li><strong>Time-Efficient:</strong> Supports 75-minute session constraints through focused, chunked content</li>
+                    </ul>
+                `
+            },
+
+            // Slide 5: Cognitive Load Theory
+            {
+                title: "Cognitive Load Theory & Audio Chunking",
+                question: "Why do you think shorter audio segments might support learning better than long ones?",
+                content: `
+                    <h3>The Theory</h3>
+                    <p><strong>Cognitive Load Theory (Sweller, 1988)</strong> states that working memory has limited capacity. When language learners process extended audio input, cognitive resources are consumed by:</p>
+                    <ul>
+                        <li>Acoustic processing (hearing individual sounds)</li>
+                        <li>Phonological processing (recognizing word boundaries)</li>
+                        <li>Semantic processing (extracting meaning)</li>
+                        <li>Integration with prior knowledge</li>
+                    </ul>
+
+                    <h3>The Problem</h3>
+                    <p>For weak learners and visually impaired students, extended audio may overload working memory <strong>before semantic processing occurs</strong>.</p>
+
+                    <h3>The Solution: Audio Chunking</h3>
+                    <p>Shorter audio segments (30-120 seconds) allow:</p>
+                    <ul>
+                        <li>Focused attention on discrete language units</li>
+                        <li>Reduced extraneous cognitive load during initial exposure</li>
+                        <li>Strategic replay and multiple exposures without overwhelming learners</li>
+                        <li>Better accommodation of learners with diverse processing speeds</li>
+                    </ul>
+
+                    <h3>Research Support</h3>
+                    <ul>
+                        <li><strong>Chun & Plass (1996):</strong> Segmented multimedia presentations improve comprehension for lower-proficiency learners</li>
+                        <li><strong>Mayer & Moreno (2003):</strong> Shorter segments with strategic pauses support deeper processing</li>
+                        <li><strong>Winke et al. (2013):</strong> L2 listeners benefit from segmented authentic material</li>
+                    </ul>
+                `
+            },
+
+            // Slide 6: Universal Design for Learning
+            {
+                title: "Universal Design for Learning (UDL) & Accessibility",
+                question: "How can we ensure all students, including those with visual impairments, have equal access to learning?",
+                content: `
+                    <h3>Three UDL Principles</h3>
+                    <table>
+                        <tr>
+                            <th>Principle</th>
+                            <th>Definition</th>
+                            <th>Platform Implementation</th>
+                        </tr>
+                        <tr>
+                            <td>Multiple Means of Representation</td>
+                            <td>Present information in multiple modalities</td>
+                            <td>Audio + English TTS + Arabic TTS + Script text</td>
+                        </tr>
+                        <tr>
+                            <td>Multiple Means of Action & Expression</td>
+                            <td>Allow learners to demonstrate understanding through varied channels</td>
+                            <td>Keyboard navigation; quiz mode; speaking practice</td>
+                        </tr>
+                        <tr>
+                            <td>Multiple Means of Engagement</td>
+                            <td>Support motivation through choice and autonomy</td>
+                            <td>Student choice to use scaffolding; self-paced review</td>
+                        </tr>
+                    </table>
+
+                    <h3>Accessibility for Visually Impaired Learners</h3>
+                    <p>The platform provides:</p>
+                    <ul>
+                        <li><strong>Full keyboard navigation:</strong> Arrow keys for clip navigation; keyboard-accessible buttons</li>
+                        <li><strong>Screen reader compatibility:</strong> Semantic HTML, ARIA labels for all interactive elements</li>
+                        <li><strong>Text-to-speech:</strong> English and Arabic TTS for script reading</li>
+                        <li><strong>Audio-first design:</strong> Audio is primary; text is supplementary</li>
+                    </ul>
+
+                    <h3>Key Outcome</h3>
+                    <p><strong>Visually impaired students achieve complete independence</strong> in accessing course material without requiring sighted peer support.</p>
+
+                    <h3>Research Support</h3>
+                    <ul>
+                        <li><strong>Rose & Gravel (2010):</strong> UDL benefits all learners, not just those with disabilities</li>
+                        <li><strong>Burgstahler & Cory (2008):</strong> Universal design in higher education improves diverse learner outcomes</li>
+                    </ul>
+                `
+            },
+
+            // Slide 7: Scaffolding & Autonomy
+            {
+                title: "Scaffolding & Gradual Autonomy Development",
+                question: "How should teacher support change as students become more independent?",
+                content: `
+                    <h3>The Concept: Zone of Proximal Development (ZPD)</h3>
+                    <p><strong>Vygotsky's ZPD</strong> describes the gap between what learners can do independently and what they can do <strong>with support</strong>. Effective teaching operates in this zone, gradually withdrawing support as competence increases.</p>
+
+                    <h3>Scaffolding Hierarchy in the Platform</h3>
+                    <p><strong>Students choose support level based on confidence:</strong></p>
+                    <ul>
+                        <li><strong>Level 3 (Extensive):</strong> Audio × multiple repeats → English script → Arabic TTS → Vocabulary definitions</li>
+                        <li><strong>Level 2 (Moderate):</strong> Audio × 2 → English script → Optional Arabic TTS</li>
+                        <li><strong>Level 1 (Minimal):</strong> Audio only (no script) → Challenge with script scrambling</li>
+                    </ul>
+
+                    <h3>Progression Framework</h3>
+                    <table>
+                        <tr>
+                            <th>Week</th>
+                            <th>Weak Learner Support Level</th>
+                            <th>Arabic TTS Use</th>
+                        </tr>
+                        <tr>
+                            <td>Week 1-2</td>
+                            <td>Level 3 (Extensive)</td>
+                            <td>Frequently available</td>
+                        </tr>
+                        <tr>
+                            <td>Week 3-4</td>
+                            <td>Level 2-3 (Transition)</td>
+                            <td>Strategic/selective</td>
+                        </tr>
+                        <tr>
+                            <td>Week 5-6</td>
+                            <td>Level 2 (Moderate)</td>
+                            <td>Rare; difficult items only</td>
+                        </tr>
+                        <tr>
+                            <td>Week 7-8</td>
+                            <td>Level 1 (Minimal)</td>
+                            <td>Not used</td>
+                        </tr>
+                    </table>
+
+                    <h3>Key Point</h3>
+                    <p>Scaffolding reduction is <strong>strategic and progressive</strong>, not abrupt. Teachers monitor learner confidence and adjust support gradually.</p>
+
+                    <h3>Research Support</h3>
+                    <ul>
+                        <li><strong>Lantolf & Thorne (2006):</strong> Scaffolding is essential for moving learners through ZPD</li>
+                        <li><strong>De Guerrero & Villamil (2000):</strong> Strategic reduction of support develops learner autonomy</li>
+                    </ul>
+                `
+            },
+
+            // Slide 8: Formative Assessment
+            {
+                title: "Formative Assessment & Learning Feedback",
+                question: "How can ongoing feedback during learning help students understand what they need to improve?",
+                content: `
+                    <h3>Definition & Importance</h3>
+                    <p><strong>Formative assessment</strong> provides ongoing feedback <strong>during learning</strong> to support metacognitive awareness and learning adjustment. Hattie (2012) identifies formative feedback as one of the <strong>highest-impact factors on student achievement</strong>.</p>
+
+                    <h3>Platform Quiz Mode Features</h3>
+                    <ul>
+                        <li><strong>Immediate feedback:</strong> Correct/incorrect responses with explanations provided instantly</li>
+                        <li><strong>Low-stakes assessment:</strong> Quiz results don't contribute to grades (formative, not summative)</li>
+                        <li><strong>Self-assessment opportunity:</strong> Learners identify areas for revision</li>
+                        <li><strong>Focused feedback:</strong> Identifies specific vocabulary/grammar misunderstandings</li>
+                    </ul>
+
+                    <h3>Classroom Implementation (75-minute session)</h3>
+                    <table>
+                        <tr>
+                            <th>Minute</th>
+                            <th>Activity</th>
+                            <th>Assessment Function</th>
+                        </tr>
+                        <tr>
+                            <td>0-10</td>
+                            <td>Vocabulary preview</td>
+                            <td>Teacher observes: Can learners recognize target vocabulary?</td>
+                        </tr>
+                        <tr>
+                            <td>30-45</td>
+                            <td>Listening & comprehension</td>
+                            <td>Teacher checks: Can learners answer questions about content?</td>
+                        </tr>
+                        <tr>
+                            <td>60-70</td>
+                            <td><strong>Platform Quiz</strong></td>
+                            <td>Quantified comprehension check; specific feedback provided</td>
+                        </tr>
+                        <tr>
+                            <td>70-75</td>
+                            <td>Reflection & discussion</td>
+                            <td>Teacher addresses misunderstandings revealed by quiz</td>
+                        </tr>
+                    </table>
+
+                    <h3>Independent Study Integration</h3>
+                    <ul>
+                        <li>Student takes quiz for self-assessment</li>
+                        <li>Feedback identifies specific gaps</li>
+                        <li>Student returns to specific clips addressing misunderstood items</li>
+                        <li>Student retakes quiz; monitors own progress</li>
+                    </ul>
+
+                    <h3>Research Support</h3>
+                    <ul>
+                        <li><strong>Black & Wiliam (1998):</strong> Formative assessment significantly improves learning outcomes</li>
+                        <li><strong>Brookfield & Preskill (2005):</strong> Low-stakes quizzes support retention and transfer</li>
+                        <li><strong>Hattie (2012):</strong> Feedback specificity and immediacy are critical factors</li>
+                    </ul>
+                `
+            },
+
+            // Slide 9: CEFR Alignment
+            {
+                title: "CEFR Alignment Across Q Skills Levels",
+                question: "How should implementation differ across proficiency levels?",
+                content: `
+                    <h3>Implementation by Level</h3>
+                    <table>
+                        <tr>
+                            <th>Q Skills Level</th>
+                            <th>CEFR</th>
+                            <th>Audio Length (typical)</th>
+                            <th>Scaffolding Strategy</th>
+                        </tr>
+                        <tr>
+                            <td>Intro</td>
+                            <td>A1</td>
+                            <td>30-60 sec</td>
+                            <td>Full (Arabic, definitions, TTS)</td>
+                        </tr>
+                        <tr>
+                            <td>1</td>
+                            <td>A1/A2</td>
+                            <td>45-90 sec</td>
+                            <td>Strategic (Arabic hidden; available)</td>
+                        </tr>
+                        <tr>
+                            <td>2</td>
+                            <td>A2</td>
+                            <td>60-120 sec</td>
+                            <td>Reduced (English only initially)</td>
+                        </tr>
+                        <tr>
+                            <td>3</td>
+                            <td>A2/B1</td>
+                            <td>90-150 sec</td>
+                            <td>Minimal (challenge features)</td>
+                        </tr>
+                        <tr>
+                            <td>4</td>
+                            <td>B1</td>
+                            <td>2-3 min</td>
+                            <td>Challenge mode; independence</td>
+                        </tr>
+                        <tr>
+                            <td>5</td>
+                            <td>B1/B2</td>
+                            <td>3-5 min</td>
+                            <td>Independent study primarily</td>
+                        </tr>
+                    </table>
+
+                    <h3>Learning Outcomes by Level</h3>
+                    <p><strong>Q Skills Intro (A1):</strong></p>
+                    <ul>
+                        <li>Understand and respond to simple, familiar spoken English</li>
+                        <li>Recognize and produce essential vocabulary (50-100 high-frequency words)</li>
+                        <li>Understand and use present simple verb forms</li>
+                        <li>Produce intelligible pronunciation</li>
+                    </ul>
+
+                    <p><strong>Q Skills 1-2 (A1/A2-A2):</strong></p>
+                    <ul>
+                        <li>Understand longer, more complex spoken English</li>
+                        <li>Recognize expanded vocabulary (200-400 words)</li>
+                        <li>Use present and past simple verb forms</li>
+                        <li>Use appropriate stress and intonation</li>
+                    </ul>
+
+                    <p><strong>Q Skills 3-5 (A2/B1-B1+):</strong></p>
+                    <ul>
+                        <li>Understand fast-paced authentic spoken English</li>
+                        <li>Use extended vocabulary (600-1200 words)</li>
+                        <li>Use complex sentence structures accurately</li>
+                        <li>Adapt register appropriately; express and justify opinions</li>
+                    </ul>
+                `
+            },
+
+            // Slide 10: Use Case 1 - Classroom Instruction
+            {
+                title: "Use Case 1: Classroom Instruction",
+                question: "How would you sequence listening, speaking, and grammar activities within a 75-minute session?",
+                content: `
+                    <h3>Context & Objective</h3>
+                    <p><strong>When:</strong> 60-70 minutes of 75-minute session</p>
+                    <p><strong>Who:</strong> All proficiency levels; mixed-ability cohorts</p>
+                    <p><strong>Goal:</strong> Develop listening comprehension, vocabulary/grammar knowledge, and speaking confidence</p>
+
+                    <h3>Platform Role</h3>
+                    <ul>
+                        <li>Provides chunked audio aligned with textbook lesson</li>
+                        <li>Delivers multiple exposures within time-constrained session</li>
+                        <li>Offers scaffolding (Arabic, TTS, definitions) for weak learners</li>
+                        <li>Enables efficient lesson flow (no searching for specific audio tracks)</li>
+                    </ul>
+
+                    <h3>Typical Session Workflow (Intro Level Example)</h3>
+                    <table style="font-size: 13px;">
+                        <tr>
+                            <th>Time</th>
+                            <th>Activity</th>
+                            <th>Platform Use</th>
+                        </tr>
+                        <tr>
+                            <td>0-5 min</td>
+                            <td>Pre-listening: vocabulary preview</td>
+                            <td>Display keywords/definitions</td>
+                        </tr>
+                        <tr>
+                            <td>5-15 min</td>
+                            <td>First listening: focused attention on Clip 1</td>
+                            <td>Play chunk × 2; students focus on gist</td>
+                        </tr>
+                        <tr>
+                            <td>15-20 min</td>
+                            <td>Comprehension check</td>
+                            <td>Teacher asks questions; students respond orally</td>
+                        </tr>
+                        <tr>
+                            <td>20-25 min</td>
+                            <td>Detailed listening with script</td>
+                            <td>Play Clip 1 with English script visible; TTS available</td>
+                        </tr>
+                        <tr>
+                            <td>25-30 min</td>
+                            <td>Speaking practice</td>
+                            <td>Students repeat; pair dialogue practice</td>
+                        </tr>
+                        <tr>
+                            <td>30-50 min</td>
+                            <td>Additional clips (same cycle)</td>
+                            <td>Repeat for Clips 2-3</td>
+                        </tr>
+                        <tr>
+                            <td>50-60 min</td>
+                            <td>Review & pattern identification</td>
+                            <td>Replay key clips; highlight patterns</td>
+                        </tr>
+                        <tr>
+                            <td>60-70 min</td>
+                            <td>Formative assessment: Quiz</td>
+                            <td>Platform quiz on clips covered</td>
+                        </tr>
+                        <tr>
+                            <td>70-75 min</td>
+                            <td>Reflection & homework assignment</td>
+                            <td>Assign independent platform review</td>
+                        </tr>
+                    </table>
+
+                    <h3>Weak Learner Accommodation Within This Workflow</h3>
+                    <ul>
+                        <li><strong>Multiple exposures:</strong> Play chunks 3-4 times (not 2)</li>
+                        <li><strong>Script support:</strong> Visible on 2nd+ exposure</li>
+                        <li><strong>Arabic translation:</strong> Available if comprehension < 60%</li>
+                        <li><strong>Reduced units:</strong> Focus on 2 chunks (not 3) to allow extensive repetition</li>
+                    </ul>
+                `
+            },
+
+            // Slide 11: Use Case 2 - Independent Study
+            {
+                title: "Use Case 2: Independent Study & Revision",
+                question: "What strategies would enable visually impaired students to study completely independently?",
+                content: `
+                    <h3>Context & Objective</h3>
+                    <p><strong>When:</strong> Outside classroom; homework; between-class study periods</p>
+                    <p><strong>Who:</strong> All proficiency levels; especially important for visually impaired learners</p>
+                    <p><strong>Goal:</strong> Support self-directed review; maintain listening skills; remove reliance on sighted peer support</p>
+
+                    <h3>Platform Role</h3>
+                    <ul>
+                        <li>Enables repeated access without teacher mediation</li>
+                        <li>Provides multiple representation modes (audio, Arabic TTS, English script, quiz)</li>
+                        <li>Allows strategic scaffolding choice based on student confidence</li>
+                        <li>Supports visually impaired students' independent learning</li>
+                    </ul>
+
+                    <h3>Student Workflow (Independent Review)</h3>
+                    <ol>
+                        <li>Open platform at home (audio speaker or headphones)</li>
+                        <li>Navigate to desired unit/clip (keyboard navigation for accessibility)</li>
+                        <li>First encounter: listen to audio only (build listening fluency)</li>
+                        <li>Comprehension self-check: "Did I understand?"</li>
+                        <li>If confident: move to next clip</li>
+                        <li>If uncertain: replay with English script visible (TTS reads if desired)</li>
+                        <li>Still uncertain: enable Arabic TTS (strategic scaffolding choice)</li>
+                        <li>Take platform quiz for self-assessment</li>
+                        <li>Review quiz feedback; identify gaps</li>
+                        <li>Return to specific clips addressing misunderstood items</li>
+                    </ol>
+
+                    <h3>Weak Learner Support</h3>
+                    <ul>
+                        <li>Self-paced review without time pressure</li>
+                        <li>Strategic scaffolding choice (learner decides when/how much support)</li>
+                        <li>Repeated access for spaced repetition</li>
+                        <li>Quiz feedback directs future study</li>
+                    </ul>
+
+                    <h3>Visually Impaired Learner Support</h3>
+                    <ul>
+                        <li><strong>Complete independence:</strong> No sighted peer assistance required</li>
+                        <li><strong>Full platform access:</strong> Keyboard navigation + screen reader compatible</li>
+                        <li><strong>Audio-first design:</strong> Audio is primary input; all supplementary features accessible via TTS</li>
+                        <li><strong>Quiz mode:</strong> Fully accessible via keyboard + screen reader</li>
+                    </ul>
+
+                    <h3>Key Outcome</h3>
+                    <p><strong>Visually impaired students achieve complete autonomy</strong> in accessing and reviewing course material.</p>
+                `
+            },
+
+            // Slide 12: Use Case 3 - Test Preparation
+            {
+                title: "Use Case 3: Test Preparation (Targeted Review)",
+                question: "If you had only 20 minutes to review material before an exam, what would you prioritize?",
+                content: `
+                    <h3>Context & Objective</h3>
+                    <p><strong>When:</strong> 1-2 weeks before assessment; limited preparation time</p>
+                    <p><strong>Goal:</strong> Efficiently target revision to specific gaps or high-frequency assessment content</p>
+
+                    <h3>Platform Role</h3>
+                    <ul>
+                        <li><strong>Search/jump functionality:</strong> Enables quick navigation to relevant clips</li>
+                        <li>Reduces review time by skipping unrelated content</li>
+                        <li>Supports focused, goal-directed preparation</li>
+                        <li>Accommodates time-constrained preparation windows</li>
+                    </ul>
+
+                    <h3>Teacher Preparation (30 minutes)</h3>
+                    <ol>
+                        <li>Identify test content focus</li>
+                        <li>Map to specific clips (e.g., "Family vocabulary: Clips 1, 5, 8")</li>
+                        <li>Distribute target clip list to students</li>
+                    </ol>
+
+                    <h3>Student Workflow (20-30 minute targeted prep)</h3>
+                    <table>
+                        <tr>
+                            <th>Step</th>
+                            <th>Action</th>
+                            <th>Time</th>
+                        </tr>
+                        <tr>
+                            <td>1-3</td>
+                            <td>Navigate to target Clip 1 (search: "1")</td>
+                            <td>1 min</td>
+                        </tr>
+                        <tr>
+                            <td>4-5</td>
+                            <td>Listen × 2; review with script if needed</td>
+                            <td>3 min</td>
+                        </tr>
+                        <tr>
+                            <td>6</td>
+                            <td>Move to Clip 5 (search: "5")</td>
+                            <td>0.5 min</td>
+                        </tr>
+                        <tr>
+                            <td>7-8</td>
+                            <td>Repeat listen cycle</td>
+                            <td>3 min</td>
+                        </tr>
+                        <tr>
+                            <td>9-10</td>
+                            <td>Continue through all target clips</td>
+                            <td>12 min (4 clips)</td>
+                        </tr>
+                        <tr>
+                            <td>11</td>
+                            <td>Targeted quiz (only identified clips)</td>
+                            <td>3 min</td>
+                        </tr>
+                        <tr>
+                            <td>12</td>
+                            <td>Review feedback; adjust strategy</td>
+                            <td>3 min</td>
+                        </tr>
+                        <tr>
+                            <td colspan="2"><strong>TOTAL</strong></td>
+                            <td><strong>~25 min</strong></td>
+                        </tr>
+                    </table>
+
+                    <h3>Efficiency Comparison</h3>
+                    <ul>
+                        <li><strong>Targeted review (6 specific clips):</strong> 20-30 minutes</li>
+                        <li><strong>vs. Full sequential review (all 20 course clips):</strong> 45-50 minutes</li>
+                        <li><strong>Time saved:</strong> 15-25 minutes for other prep activities</li>
+                    </ul>
+
+                    <h3>In-Class Prep Session (Teacher-Led)</h3>
+                    <ul>
+                        <li>Use search box to jump directly to target clips (15 min, not 45+ min)</li>
+                        <li>Quick listening + discussion of key content</li>
+                        <li>Efficient review without redundancy</li>
+                    </ul>
+                `
+            },
+
+            // Slide 13: Weak Learner Support
+            {
+                title: "Supporting Weak Learners",
+                question: "What observable behaviors tell us a student is struggling with comprehension?",
+                content: `
+                    <h3>Identifying Weak Learners</h3>
+                    <p><strong>Observable Indicators (During classroom listening):</strong></p>
+                    <ul>
+                        <li>Blank responses to comprehension questions (cannot extract meaning)</li>
+                        <li>Inability to repeat heard vocabulary correctly (phonological processing difficulty)</li>
+                        <li>Requests for Arabic/native language explanation</li>
+                        <li>Low quiz scores (< 60% comprehension accuracy)</li>
+                        <li>Shorter attention span for listening (fatigue during extended audio)</li>
+                    </ul>
+
+                    <h3>Platform Accommodation Strategies</h3>
+                    <table style="font-size: 13px;">
+                        <tr>
+                            <th>Challenge</th>
+                            <th>Platform Support</th>
+                            <th>Teacher Strategy</th>
+                        </tr>
+                        <tr>
+                            <td>Cannot extract meaning from audio</td>
+                            <td>Arabic TTS; definitions display</td>
+                            <td>Provide pre-listening definitions verbally</td>
+                        </tr>
+                        <tr>
+                            <td>Pronunciation difficulties</td>
+                            <td>TTS models; phonetic support</td>
+                            <td>Explicit pronunciation drilling; model + repeat cycle</td>
+                        </tr>
+                        <tr>
+                            <td>Low confidence/anxiety</td>
+                            <td>Arabic available; repeated exposure</td>
+                            <td>Normalize scaffolding use; frame as learning strategy</td>
+                        </tr>
+                        <tr>
+                            <td>Limited attention span</td>
+                            <td>Shorter clips; multiple formats</td>
+                            <td>Frequent activity variety; listen × 2 then switch activity</td>
+                        </tr>
+                        <tr>
+                            <td>Vocabulary gaps</td>
+                            <td>Definitions; keyword pre-display</td>
+                            <td>Reduce new items per lesson; focus on high-frequency words</td>
+                        </tr>
+                        <tr>
+                            <td>Grammar confusion</td>
+                            <td>Grammar explanations; script examples</td>
+                            <td>Isolated grammar mini-lesson before integrated listening</td>
+                        </tr>
+                    </table>
+
+                    <h3>Scaffolding Hierarchy for Independent Study</h3>
+                    <p><strong>Level 3 (Extensive Scaffolding) - Weak Learners:</strong></p>
+                    <ul>
+                        <li>Audio × 1 (gist listening)</li>
+                        <li>English script + TTS reading</li>
+                        <li>Arabic TTS for meaning verification</li>
+                        <li>Vocabulary definitions available</li>
+                        <li>Quiz after multiple exposures (3-4 ×)</li>
+                    </ul>
+
+                    <p><strong>Progression Over Semester:</strong></p>
+                    <ul>
+                        <li>Week 1-3: Level 3 (Arabic TTS frequently used)</li>
+                        <li>Week 4-5: Level 2-3 Transition (Arabic TTS selective)</li>
+                        <li>Week 6-7: Level 2 (Arabic TTS rare; English script primary)</li>
+                        <li>Week 8: Level 1 (Minimal scaffolding; independence building)</li>
+                    </ul>
+
+                    <h3>Key Principle</h3>
+                    <p><strong>Scaffolding reduction is strategic and progressive.</strong> Teachers monitor learner confidence and adjust support gradually, not abruptly.</p>
+                `
+            },
+
+            // Slide 14: Accessibility for Visually Impaired
+            {
+                title: "Accessibility for Visually Impaired Learners",
+                question: "What would visually impaired students need to participate equally in all aspects of learning?",
+                content: `
+                    <h3>Design Principles</h3>
+                    <p>The platform is designed with <strong>Universal Design for Learning (UDL)</strong> principles, supporting all learners:</p>
+                    <ul>
+                        <li><strong>Audio-first:</strong> Audio is primary input (natural advantage for visually impaired learners)</li>
+                        <li><strong>Multiple representation modes:</strong> Audio + text (via TTS) + optional Arabic</li>
+                        <li><strong>Keyboard accessible:</strong> All functions via keyboard navigation (arrow keys, tabs)</li>
+                        <li><strong>Screen reader compatible:</strong> Semantic HTML5, ARIA labels on all interactive elements</li>
+                    </ul>
+
+                    <h3>Technical Features</h3>
+                    <table>
+                        <tr>
+                            <th>Feature</th>
+                            <th>Implementation</th>
+                        </tr>
+                        <tr>
+                            <td>Audio Playback</td>
+                            <td>Native HTML5 audio controls; fully keyboard accessible</td>
+                        </tr>
+                        <tr>
+                            <td>Keyboard Navigation</td>
+                            <td>Arrow keys (next/previous clips); Tab (navigation between elements)</td>
+                        </tr>
+                        <tr>
+                            <td>Screen Reader Compatibility</td>
+                            <td>ARIA labels on buttons; semantic heading structure; proper form labels</td>
+                        </tr>
+                        <tr>
+                            <td>Text-to-Speech</td>
+                            <td>English TTS (pronunciation model); Arabic TTS (meaning verification)</td>
+                        </tr>
+                        <tr>
+                            <td>Quiz Mode</td>
+                            <td>Fully keyboard accessible; radio button options; clear labeling</td>
+                        </tr>
+                    </table>
+
+                    <h3>Classroom Integration</h3>
+                    <ul>
+                        <li>All students hear identical audio via classroom speaker</li>
+                        <li>Visually impaired student uses keyboard + screen reader (personal device or classroom accessibility tool)</li>
+                        <li>Script reading available via TTS at student's pace (no visual reading speed constraint)</li>
+                        <li>Speaking practice: full participation in pair work and class discussion</li>
+                        <li>Quiz mode: independent completion via keyboard + screen reader</li>
+                    </ul>
+
+                    <h3>Independent Study Workflow</h3>
+                    <ol>
+                        <li>Student opens platform on personal computer</li>
+                        <li>Screen reader active (NVDA free; JAWS commercial; VoiceOver on Mac)</li>
+                        <li>Navigate to clip using arrow keys / tab + enter</li>
+                        <li>Listen to audio (speaker or headphones)</li>
+                        <li>Choose to read script via TTS (student initiates when ready)</li>
+                        <li>Complete quiz using keyboard + screen reader independently</li>
+                        <li>No sighted peer assistance required</li>
+                    </ol>
+
+                    <h3>Key Outcome</h3>
+                    <p><strong>Visually impaired learners achieve complete independence and equal access to all platform features and learning activities.</strong></p>
+
+                    <h3>Important Distinction</h3>
+                    <ul>
+                        <li>Visually impaired students ≠ low proficiency</li>
+                        <li>Accessibility need ≠ scaffold need</li>
+                        <li>Visually impaired weak learners: use audio + extensive scaffolding (same as sighted weak learners)</li>
+                        <li>Visually impaired advanced learners: use audio + minimal scaffolding (same as sighted advanced learners)</li>
+                    </ul>
+                `
+            },
+
+            // Slide 15: 75-Minute Session Planning
+            {
+                title: "Planning Within 75-Minute Session Constraints",
+                question: "How can teachers fit listening, comprehension, grammar, speaking, and assessment into 75 minutes?",
+                content: `
+                    <h3>The Challenge</h3>
+                    <ul>
+                        <li>Q Skills lessons include 8-12 minutes of audio</li>
+                        <li>Multiple exposures needed for learning (listen × 2-4)</li>
+                        <li>Comprehension checks, speaking practice, grammar review required</li>
+                        <li>Formative assessment recommended</li>
+                        <li>Activity variety needed to maintain engagement</li>
+                        <li>Time available: 75 minutes</li>
+                    </ul>
+
+                    <h3>Solution: Audio Chunking</h3>
+                    <p><strong>Rather than play full lesson audio, select 2-4 most important chunks (~60 seconds each total)</strong></p>
+
+                    <h3>Time Comparison</h3>
+                    <table>
+                        <tr>
+                            <th>Approach</th>
+                            <th>Audio Time</th>
+                            <th>Activities</th>
+                            <th>Total Time</th>
+                            <th>Fit in 75 min?</th>
+                        </tr>
+                        <tr>
+                            <td>Full lesson (traditional)</td>
+                            <td>12-16 min</td>
+                            <td>Listen × 2, check, grammar, speak, quiz</td>
+                            <td>45+ min</td>
+                            <td>Tight; minimal variety</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Chunked approach (2-3 chunks)</strong></td>
+                            <td><strong>2.25 min</strong></td>
+                            <td><strong>Listen × 3, check, grammar, speak, quiz</strong></td>
+                            <td><strong>~40 min</strong></td>
+                            <td><strong>Yes; 35 min for variation</strong></td>
+                        </tr>
+                    </table>
+
+                    <h3>Sample 75-Minute Session (Q Skills Intro)</h3>
+                    <table style="font-size: 12px;">
+                        <tr>
+                            <th>Time</th>
+                            <th>Activity</th>
+                            <th>Platform Use</th>
+                            <th>Focus</th>
+                        </tr>
+                        <tr>
+                            <td>0-5</td>
+                            <td>Warm-up & activation</td>
+                            <td>None</td>
+                            <td>Prior knowledge</td>
+                        </tr>
+                        <tr>
+                            <td>5-10</td>
+                            <td>Pre-listening: vocabulary</td>
+                            <td>Display keywords/definitions</td>
+                            <td>Set comprehension question</td>
+                        </tr>
+                        <tr>
+                            <td>10-20</td>
+                            <td>Listening: Clip 1 × 2</td>
+                            <td>Audio playback</td>
+                            <td>Gist comprehension</td>
+                        </tr>
+                        <tr>
+                            <td>20-25</td>
+                            <td>Comprehension check</td>
+                            <td>Oral Q&A</td>
+                            <td>Confirm understanding</td>
+                        </tr>
+                        <tr>
+                            <td>25-30</td>
+                            <td>Detailed listening + script</td>
+                            <td>Display English script; TTS optional</td>
+                            <td>Focus on language</td>
+                        </tr>
+                        <tr>
+                            <td>30-38</td>
+                            <td>Speaking practice</td>
+                            <td>Model + repeat; pair dialogue</td>
+                            <td>Production practice</td>
+                        </tr>
+                        <tr>
+                            <td>38-48</td>
+                            <td>Clips 2-3: repeat cycle</td>
+                            <td>Same as Clip 1 (faster pace)</td>
+                            <td>Build fluency</td>
+                        </tr>
+                        <tr>
+                            <td>48-58</td>
+                            <td>Guided review</td>
+                            <td>Replay key segments; highlight patterns</td>
+                            <td>Consolidation</td>
+                        </tr>
+                        <tr>
+                            <td>58-68</td>
+                            <td>Quiz</td>
+                            <td>Platform quiz (5-8 items)</td>
+                            <td>Formative assessment</td>
+                        </tr>
+                        <tr>
+                            <td>68-75</td>
+                            <td>Reflection & homework</td>
+                            <td>Assign independent review</td>
+                            <td>Preview next lesson</td>
+                        </tr>
+                    </table>
+
+                    <h3>Chunk Selection Criteria</h3>
+                    <p>Select chunks that:</p>
+                    <ul>
+                        <li>Contain highest-frequency vocabulary</li>
+                        <li>Demonstrate key grammar structure for lesson</li>
+                        <li>Are engaging/motivating for learners</li>
+                        <li>Lend themselves to speaking practice</li>
+                        <li>Are manageable for weak learners (scaffolding friendly)</li>
+                    </ul>
+                `
+            },
+
+            // Slide 16: Feature Implementation by Level
+            {
+                title: "Feature Implementation by Proficiency Level",
+                question: "Should all students use the same platform features, or should features vary by level?",
+                content: `
+                    <h3>Feature Matrix: Platform Features by Level</h3>
+                    <table style="font-size: 11px;">
+                        <tr>
+                            <th>Feature</th>
+                            <th>Intro (A1)</th>
+                            <th>Level 1 (A1/A2)</th>
+                            <th>Level 2 (A2)</th>
+                            <th>Level 3+ (B1+)</th>
+                        </tr>
+                        <tr>
+                            <td><strong>Audio Playback</strong></td>
+                            <td>Primary</td>
+                            <td>Primary</td>
+                            <td>Primary</td>
+                            <td>Primary</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Chunk Length</strong></td>
+                            <td>30-60 sec</td>
+                            <td>45-90 sec</td>
+                            <td>90-120 sec</td>
+                            <td>120-180 sec</td>
+                        </tr>
+                        <tr>
+                            <td><strong>English Script</strong></td>
+                            <td>Always shown (2nd+ listen)</td>
+                            <td>After 1st listen</td>
+                            <td>Optional</td>
+                            <td>Optional/challenge</td>
+                        </tr>
+                        <tr>
+                            <td><strong>English TTS</strong></td>
+                            <td>Modeled by teacher</td>
+                            <td>Student-initiated</td>
+                            <td>Student-initiated</td>
+                            <td>Limited</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Arabic TTS</strong></td>
+                            <td>Freely available</td>
+                            <td>Strategic (uncertain items)</td>
+                            <td>Rare/weak learners only</td>
+                            <td>Not used</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Definitions</strong></td>
+                            <td>Always shown</td>
+                            <td>With keywords</td>
+                            <td>Optional</td>
+                            <td>Not needed</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Illustrations</strong></td>
+                            <td>Always shown</td>
+                            <td>Optional</td>
+                            <td>Not needed</td>
+                            <td>Not needed</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Script Scrambling</strong></td>
+                            <td>Not used</td>
+                            <td>Rare/challenge</td>
+                            <td>Regular use</td>
+                            <td>Regular use</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Quiz Length</strong></td>
+                            <td>3-5 items (MC)</td>
+                            <td>5-8 items (MC+SA)</td>
+                            <td>8-10 items (mixed)</td>
+                            <td>10-15 items (complex)</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Search Box</strong></td>
+                            <td>Not used (sequential)</td>
+                            <td>Limited/teacher-led</td>
+                            <td>Student self-study</td>
+                            <td>Student independence</td>
+                        </tr>
+                    </table>
+
+                    <h3>Key Principle: Scaffolding Varies by Level</h3>
+                    <ul>
+                        <li><strong>Lower Levels (Intro-1):</strong> More scaffolding; shorter chunks; more explicit support</li>
+                        <li><strong>Mid Levels (2-3):</strong> Transitioning; scaffolding gradually reduced; challenge features introduced</li>
+                        <li><strong>Higher Levels (4-5):</strong> Minimal scaffolding; longer chunks; emphasis on independence and authentic language</li>
+                    </ul>
+
+                    <h3>Within-Level Differentiation</h3>
+                    <p><strong>Even at same proficiency level, teachers differentiate for weak learners:</strong></p>
+                    <ul>
+                        <li><strong>Strong Intro learner:</strong> Minimal scaffolding; challenge with script scrambling</li>
+                        <li><strong>Weak Intro learner:</strong> Extensive scaffolding; Arabic TTS available; repeated exposures</li>
+                        <li>Both study same content; same chunks; different support levels</li>
+                    </ul>
+
+                    <h3>Implementation Strategy</h3>
+                    <ul>
+                        <li>Teachers plan base lesson for proficiency level</li>
+                        <li>For weak learners: increase scaffolding, repetitions, and chunk length</li>
+                        <li>For advanced learners: reduce scaffolding, introduce challenges, encourage independence</li>
+                        <li>Scaffolding adjustments happen within classroom instruction (not separate materials)</li>
+                    </ul>
+                `
+            },
+
+            // Slide 17: Assessment Integration
+            {
+                title: "Assessment Integration & Learning Outcomes",
+                question: "How should we measure whether students are actually learning from platform use?",
+                content: `
+                    <h3>Assessment Levels</h3>
+                    <table>
+                        <tr>
+                            <th>Assessment Type</th>
+                            <th>Purpose</th>
+                            <th>Timing</th>
+                            <th>Platform Role</th>
+                        </tr>
+                        <tr>
+                            <td><strong>Formative (In-Lesson)</strong></td>
+                            <td>Provide feedback during learning</td>
+                            <td>Within 75-min session</td>
+                            <td>Quiz mode; immediate feedback</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Formative (Independent)</strong></td>
+                            <td>Self-assessment; guide revision</td>
+                            <td>Homework/study hall</td>
+                            <td>Quiz mode; quiz feedback</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Summative</strong></td>
+                            <td>Grade students; determine proficiency</td>
+                            <td>End of unit/semester</td>
+                            <td>Data informally; formal exams used for grades</td>
+                        </tr>
+                    </table>
+
+                    <h3>Classroom Assessment Cycle (75-minute session)</h3>
+                    <ul>
+                        <li><strong>Minute 0-10:</strong> Vocabulary pre-assessment (teacher observes: recognize target vocabulary?)</li>
+                        <li><strong>Minute 30-45:</strong> Listening comprehension check (teacher checks: answer questions about chunk?)</li>
+                        <li><strong>Minute 60-70:</strong> Platform quiz (quantified comprehension check)</li>
+                        <li><strong>Minute 70-75:</strong> Reflection (What was difficult? What do you want to review?)</li>
+                    </ul>
+
+                    <h3>Independent Study Assessment</h3>
+                    <ul>
+                        <li><strong>Self-quiz:</strong> Learner completes platform quiz; compares to previous attempt</li>
+                        <li><strong>Repeat attempt:</strong> Learner identifies misunderstood items; replays specific clips; retakes quiz</li>
+                        <li><strong>Scaffolding adjustment:</strong> Learner increases Arabic if scores drop; decreases if scores improve</li>
+                    </ul>
+
+                    <h3>Test Preparation Assessment</h3>
+                    <ul>
+                        <li>Quiz results show specific vocabulary/grammar gaps</li>
+                        <li>Targeted re-exposure to misunderstood items</li>
+                        <li>Pre-test confidence prediction</li>
+                    </ul>
+
+                    <h3>Learning Outcomes Alignment</h3>
+                    <p><strong>Q Skills Intro (A1) Outcomes - Platform Support:</strong></p>
+                    <table>
+                        <tr>
+                            <th>Learning Outcome</th>
+                            <th>Platform Support</th>
+                        </tr>
+                        <tr>
+                            <td>Understand simple spoken English in familiar contexts</td>
+                            <td>Chunked audio (30-60 sec) for focused comprehension</td>
+                        </tr>
+                        <tr>
+                            <td>Recognize/produce essential vocabulary (50-100 words)</td>
+                            <td>Vocabulary definitions; keyword pre-display; TTS modeling</td>
+                        </tr>
+                        <tr>
+                            <td>Understand/use present simple verb forms</td>
+                            <td>Grammar explanations; script examples; quiz assessment</td>
+                        </tr>
+                        <tr>
+                            <td>Produce intelligible pronunciation</td>
+                            <td>TTS models; pronunciation drilling; pair speaking practice</td>
+                        </tr>
+                        <tr>
+                            <td>Participate in guided conversations</td>
+                            <td>Repetition models; pair work facilitation; speaking practice prompts</td>
+                        </tr>
+                    </table>
+
+                    <h3>Data Collection (Ongoing)</h3>
+                    <ul>
+                        <li><strong>Quiz performance trajectory:</strong> Scores across units show learning progress</li>
+                        <li><strong>Scaffolding usage patterns:</strong> Arabic TTS frequency indicates confidence levels</li>
+                        <li><strong>Search box usage:</strong> Frequent searches for same content indicate difficulty areas</li>
+                        <li><strong>Retention:</strong> Repeated self-quiz attempts show spaced repetition engagement</li>
+                    </ul>
+                `
+            },
+
+            // Slide 18: Getting Started
+            {
+                title: "Getting Started: Implementation Steps",
+                question: "What would be the first practical steps to introduce this platform to your students?",
+                content: `
+                    <h3>Pre-Implementation (Week Before First Class)</h3>
+                    <ol>
+                        <li>Verify all course audio files uploaded to platform (organized by unit/level)</li>
+                        <li>Test platform on different devices/browsers</li>
+                        <li>Test with screen reader (NVDA) for accessibility compliance</li>
+                        <li>Test keyboard navigation pathways</li>
+                        <li>Create sample lesson plan using platform</li>
+                        <li>Plan weak learner accommodations for your cohort</li>
+                        <li>Set up accessibility check for visually impaired students (if applicable)</li>
+                    </ol>
+
+                    <h3>First Class: Student Orientation (5 minutes)</h3>
+                    <ul>
+                        <li>Introduce platform purpose: "Custom audio player for our chunks"</li>
+                        <li>Demonstrate basic features:
+                            <ul>
+                                <li>How to play/pause audio</li>
+                                <li>How to view script (if applicable)</li>
+                                <li>How to access definitions</li>
+                            </ul>
+                        </li>
+                        <li>Show one example clip live</li>
+                    </ul>
+
+                    <h3>First Week: Feature Introduction</h3>
+                    <table>
+                        <tr>
+                            <th>Class</th>
+                            <th>Feature Introduced</th>
+                            <th>Time</th>
+                        </tr>
+                        <tr>
+                            <td>Class 1</td>
+                            <td>Basic audio playback; navigation</td>
+                            <td>5 min</td>
+                        </tr>
+                        <tr>
+                            <td>Class 2</td>
+                            <td>Script display; TTS (English)</td>
+                            <td>3 min</td>
+                        </tr>
+                        <tr>
+                            <td>Class 3</td>
+                            <td>Arabic TTS (if applicable); definitions</td>
+                            <td>3 min</td>
+                        </tr>
+                        <tr>
+                            <td>Class 4</td>
+                            <td>Quiz mode; feedback interpretation</td>
+                            <td>5 min</td>
+                        </tr>
+                        <tr>
+                            <td>Class 5</td>
+                            <td>Search box (for Levels 2+) or independent study review</td>
+                            <td>3 min</td>
+                        </tr>
+                    </table>
+
+                    <h3>First Two Weeks: Classroom Implementation</h3>
+                    <ul>
+                        <li><strong>Week 1:</strong> Full lesson using 1-2 chunks; simple scaffolding</li>
+                        <li><strong>Week 2:</strong> Multiple chunks; varied activities; first quiz</li>
+                        <li>Monitor: Student comfort with platform; technical issues; weak learner engagement</li>
+                        <li>Collect feedback: "What was confusing? What worked?"</li>
+                    </ul>
+
+                    <h3>Ongoing Adjustments</h3>
+                    <ul>
+                        <li>Based on student feedback, adjust platform use patterns</li>
+                        <li>Monitor weak learner progress; adjust scaffolding accordingly</li>
+                        <li>Verify visually impaired student accessibility; resolve any issues</li>
+                        <li>Document successful strategies for sharing with colleagues</li>
+                    </ul>
+
+                    <h3>Quick Checklist: Week 1-2</h3>
+                    <ul>
+                        <li>☐ Audio files uploaded; tested playback</li>
+                        <li>☐ Platform accessibility verified (keyboard, screen reader)</li>
+                        <li>☐ Student orientation completed (first class)</li>
+                        <li>☐ First lesson using platform successfully completed</li>
+                        <li>☐ Weak learner accommodations implemented</li>
+                        <li>☐ Visually impaired student setup checked (if applicable)</li>
+                        <li>☐ Quiz mode demonstrated; feedback explained</li>
+                    </ul>
+                `
+            },
+
+            // Slide 19: Summary & Call to Action
+            {
+                title: "Summary & Next Steps",
+                question: "What will you do first to begin implementing the platform with your students?",
+                content: `
+                    <h3>Key Takeaways</h3>
+                    <ul>
+                        <li><strong>Problem Solved:</strong> Oxford player limitation for custom-chunked audio is addressed</li>
+                        <li><strong>Research-Based:</strong> Design grounded in Cognitive Load Theory, UDL, and formative assessment research</li>
+                        <li><strong>Flexible Implementation:</strong> Three distinct use cases (classroom, independent study, test prep)</li>
+                        <li><strong>Inclusive Design:</strong> Supports weak learners, visually impaired students, and all proficiency levels</li>
+                        <li><strong>Time-Efficient:</strong> Fits within 75-minute session constraints through strategic chunking</li>
+                    </ul>
+
+                    <h3>What Makes This Platform Useful</h3>
+                    <ul>
+                        <li><strong>Addresses a real gap:</strong> Plays custom-chunked audio that Oxford's tool cannot</li>
+                        <li><strong>Supports accessibility:</strong> Fully accessible for visually impaired learners (keyboard + screen reader)</li>
+                        <li><strong>Weak learner focus:</strong> Strategic scaffolding (Arabic, TTS, definitions) built in</li>
+                        <li><strong>Efficient test prep:</strong> Search function saves preparation time significantly</li>
+                        <li><strong>Formative assessment:</strong> Quiz mode integrated for ongoing learning feedback</li>
+                    </ul>
+
+                    <h3>Alignment with KSU Context</h3>
+                    <ul>
+                        <li><strong>First Common Year structure:</strong> Designed for 75-minute sessions, 5 days/week, 8-week semester</li>
+                        <li><strong>Placement-based cohorts:</strong> Supports differentiation within mixed-proficiency groups</li>
+                        <li><strong>Q Skills series:</strong> Integrates directly with textbooks Intro through Level 5</li>
+                        <li><strong>Mandatory requirement:</strong> Contributes to First Common Year English learning outcomes</li>
+                        <li><strong>Accessibility priority:</strong> Removes barriers for visually impaired students; enables independence</li>
+                    </ul>
+
+                    <h3>Recommended Next Steps</h3>
+                    <ol>
+                        <li><strong>Individual teacher:</strong>
+                            <ul>
+                                <li>Review implementation guide for your proficiency level</li>
+                                <li>Prepare audio files for your course</li>
+                                <li>Plan first lesson using platform</li>
+                                <li>Implement Week 1 with one cohort (pilot)</li>
+                            </ul>
+                        </li>
+                        <li><strong>Department/Program:</strong>
+                            <ul>
+                                <li>Appoint platform champion for technical support</li>
+                                <li>Schedule professional development workshop (3-4 hours recommended)</li>
+                                <li>Pilot with one proficiency level (recommend Intro or Level 1)</li>
+                                <li>Collect data on student outcomes and teacher satisfaction</li>
+                                <li>Scale gradually to additional levels based on pilot success</li>
+                            </ul>
+                        </li>
+                    </ol>
+
+                    <h3>Evidence of Success to Track</h3>
+                    <ul>
+                        <li>Quiz performance trends (across units and cohorts)</li>
+                        <li>Student satisfaction (feedback, engagement)</li>
+                        <li>Weak learner progress (scaffolding reduction over time)</li>
+                        <li>Visually impaired student independence (reduced need for sighted peer support)</li>
+                        <li>Test preparation efficiency (time spent on revision)</li>
+                        <li>Teacher confidence and ease of use</li>
+                    </ul>
+
+                    <h3>Final Thought</h3>
+                    <p><strong>"The platform is a tool to support and supplement Oxford CPT, not a substitute for it."</strong> Best results occur when used as part of a thoughtful, differentiated teaching strategy that responds to your students' specific needs and proficiency levels.</p>
+
+                    <h3>Questions?</h3>
+                    <p>Thank you for your attention and engagement.</p>
+                `
+            }
+        ];
+
+        // State management
+        let currentSlide = 0;
+        let searchHighlight = -1;
+
+        // DOM elements
+        const slideTitle = document.getElementById('slideTitle');
+        const slideCounter = document.getElementById('slideCounter');
+        const slideContent = document.getElementById('slideContent');
+        const slideInfo = document.getElementById('slideInfo');
+        const prevBtn = document.getElementById('prevBtn');
+        const nextBtn = document.getElementById('nextBtn');
+        const slideSearch = document.getElementById('slideSearch');
+        const searchSuggestions = document.getElementById('searchSuggestions');
+
+        // Initialize presentation
+        function init() {
+            renderSlide();
+            setupEventListeners();
+        }
+
+        // Render current slide
+        function renderSlide() {
+            const slide = slides[currentSlide];
+            
+            // Update header
+            slideTitle.textContent = slide.title;
+            slideCounter.textContent = `Slide ${currentSlide + 1} of ${slides.length}`;
+            
+            // Update slide info
+            slideInfo.textContent = `${currentSlide + 1} / ${slides.length}`;
+            
+            // Update content
+            slideContent.innerHTML = `
+                <div class="audience-question">${slide.question}</div>
+                <div class="content-section">
+                    <details>
+                        <summary>Click to reveal content</summary>
+                        <div class="detail-content">
+                            ${slide.content}
+                        </div>
+                    </details>
+                </div>
+            `;
+            
+            // Add fade animation
+            slideContent.classList.add('fade-in');
+            
+            // Update button states
+            updateButtonStates();
+            
+            // Clear search
+            slideSearch.value = '';
+            searchSuggestions.classList.remove('active');
+            searchSuggestions.innerHTML = '';
+            
+            // Reset details to closed state
+            const allDetails = slideContent.querySelectorAll('details');
+            allDetails.forEach(detail => detail.open = false);
+        }
+
+        // Update button states
+        function updateButtonStates() {
+            prevBtn.disabled = currentSlide === 0;
+            nextBtn.disabled = currentSlide === slides.length - 1;
+        }
+
+        // Navigate to next slide
+        function goToNextSlide() {
+            if (currentSlide < slides.length - 1) {
+                currentSlide++;
+                renderSlide();
+            }
+        }
+
+        // Navigate to previous slide
+        function goToPreviousSlide() {
+            if (currentSlide > 0) {
+                currentSlide--;
+                renderSlide();
+            }
+        }
+
+        // Jump to specific slide
+        function jumpToSlide(slideNumber) {
+            const index = slideNumber - 1;
+            if (index >= 0 && index < slides.length) {
+                currentSlide = index;
+                renderSlide();
+                searchSuggestions.classList.remove('active');
+            }
+        }
+
+        // Handle search input
+        function handleSearch(e) {
+            const query = e.target.value.trim().toLowerCase();
+            
+            if (!query) {
+                searchSuggestions.classList.remove('active');
+                searchSuggestions.innerHTML = '';
+                return;
+            }
+
+            // Search by slide number
+            const slideNumber = parseInt(query, 10);
+            if (!isNaN(slideNumber) && slideNumber > 0 && slideNumber <= slides.length) {
+                displaySearchSuggestions(query, slideNumber);
+                return;
+            }
+
+            // Search by title
+            const matches = slides
+                .map((slide, index) => ({
+                    number: index + 1,
+                    title: slide.title,
+                    index
+                }))
+                .filter(item => item.title.toLowerCase().includes(query));
+
+            if (matches.length > 0) {
+                displayTitleMatches(matches);
+            } else {
+                searchSuggestions.classList.remove('active');
+            }
+        }
+
+        // Display search suggestions for slide numbers
+        function displaySearchSuggestions(query, slideNumber) {
+            const slide = slides[slideNumber - 1];
+            searchSuggestions.innerHTML = `
+                <div class="suggestion-item" onclick="jumpToSlide(${slideNumber})">
+                    <span class="suggestion-number">Slide ${slideNumber}</span>
+                    <span>${slide.title}</span>
+                </div>
+            `;
+            searchSuggestions.classList.add('active');
+        }
+
+        // Display title matches
+        function displayTitleMatches(matches) {
+            searchSuggestions.innerHTML = matches
+                .map(item => `
+                    <div class="suggestion-item" onclick="jumpToSlide(${item.number})">
+                        <span class="suggestion-number">Slide ${item.number}</span>
+                        <span>${item.title}</span>
+                    </div>
+                `)
+                .join('');
+            searchSuggestions.classList.add('active');
+        }
+
+        // Setup event listeners
+        function setupEventListeners() {
+            nextBtn.addEventListener('click', goToNextSlide);
+            prevBtn.addEventListener('click', goToPreviousSlide);
+            
+            // Search functionality
+            slideSearch.addEventListener('input', handleSearch);
+            slideSearch.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter') {
+                    const query = slideSearch.value.trim();
+                    const slideNumber = parseInt(query, 10);
+                    if (!isNaN(slideNumber)) {
+                        jumpToSlide(slideNumber);
+                    }
+                }
+            });
+            
+            // Keyboard navigation
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'ArrowRight') {
+                    goToNextSlide();
+                } else if (e.key === 'ArrowLeft') {
+                    goToPreviousSlide();
+                }
+            });
+
+            // Close suggestions when clicking outside
+            document.addEventListener('click', (e) => {
+                if (!e.target.closest('.search-box-container')) {
+                    searchSuggestions.classList.remove('active');
+                }
+            });
+        }
+
+        // Initialize on load
+        document.addEventListener('DOMContentLoaded', init);
+    </script>
+</body>
+</html>
